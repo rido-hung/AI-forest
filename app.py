@@ -38,6 +38,7 @@ expected_features = {
     "mean_d": ["meand", "dbq", "dbqcm", "dmean", "d"],
     "h_mean": ["hmean", "hhb", "h", "height"],
     "density_ha": ["densityha", "n_cay_ha", "ncayha", "ncay", "density", "n"],
+    "V": ["v", "v_m3_ha", "volume", "v(m3ha)", "v(m3/ha)"],
     "AGB_t_ha": ["agbtha", "agb", "agb_t_ha"]
 }
 
@@ -51,12 +52,27 @@ if uploaded_file is None:
     st.stop()
 
 # read sheets defensively
+# try:
+#     df_train = pd.read_excel(uploaded_file, sheet_name="data")
+#     uploaded_file.seek(0)
+#     df_new = pd.read_excel(uploaded_file, sheet_name="new_data")
+# except Exception as e:
+#     st.error("Không đọc được 2 sheet 'data' và 'new_data'. Kiểm tra tên sheet và upload lại.")
+#     st.stop()
+
 try:
     df_train = pd.read_excel(uploaded_file, sheet_name="data")
     uploaded_file.seek(0)
-    df_new = pd.read_excel(uploaded_file, sheet_name="new_data")
+
+    # thử đọc new_data, nếu không có thì dùng lại df_train
+    try:
+        df_new = pd.read_excel(uploaded_file, sheet_name="new_data")
+    except:
+        st.warning("Không có sheet 'new_data'. Sẽ dùng sheet 'data' để dự báo.")
+        df_new = df_train.copy()
+
 except Exception as e:
-    st.error("Không đọc được 2 sheet 'data' và 'new_data'. Kiểm tra tên sheet và upload lại.")
+    st.error("Không đọc được sheet 'data'. Kiểm tra lại file Excel.")
     st.stop()
 
 # show read columns (debug)
@@ -155,15 +171,15 @@ X_new = df_new[required_new_cols].copy()
 X_new = X_new.apply(pd.to_numeric, errors="coerce")
 
 if X_new.shape[0] == 0:
-    st.warning("⚠️ Sheet 'new_data' không có dữ liệu để dự báo. Hãy nhập ít nhất 1 dòng.")
+    st.warning("⚠️ Không có dữ liệu để dự báo.")
 else:
     if X_new.isnull().any().any():
-        st.warning("Có giá trị NaN trong new_data, sẽ thay bằng 0.")
+        st.warning("Có giá trị NaN trong dữ liệu dự báo, sẽ thay bằng 0.")
         X_new = X_new.fillna(0)
 
     df_new["AGB_du_bao"] = model.predict(X_new)
 
-    st.subheader("Kết quả dự báo (new_data)")
+    st.subheader("Kết quả dự báo")
     st.dataframe(df_new)
 
     # allow download
@@ -176,4 +192,3 @@ else:
         file_name="forest_prediction.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
