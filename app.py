@@ -38,7 +38,6 @@ expected_features = {
     "mean_d": ["meand", "dbq", "dbqcm", "dmean", "d"],
     "h_mean": ["hmean", "hhb", "h", "height"],
     "density_ha": ["densityha", "n_cay_ha", "ncayha", "ncay", "density", "n"],
-    "V": ["v", "v_m3_ha", "volume", "v(m3ha)", "v(m3/ha)"],
     "AGB_t_ha": ["agbtha", "agb", "agb_t_ha"]
 }
 
@@ -177,3 +176,4 @@ else:
         file_name="forest_prediction.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
