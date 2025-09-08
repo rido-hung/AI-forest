@@ -38,6 +38,7 @@ expected_features = {
     "mean_d": ["meand", "dbq", "dbqcm", "dmean", "d"],
     "h_mean": ["hmean", "hhb", "h", "height"],
     "density_ha": ["densityha", "n_cay_ha", "ncayha", "ncay", "density", "n"],
+    "V": ["v", "v_m3_ha", "volume", "v(m3ha)", "v(m3/ha)"],
     "AGB_t_ha": ["agbtha", "agb", "agb_t_ha"]
 }
 
@@ -137,16 +138,42 @@ y = df_train[mapped["AGB_t_ha"]]
 model = RandomForestRegressor(n_estimators=200, random_state=42)
 model.fit(X, y)
 
-# Predict
-X_new = df_new[required_new_cols]
-df_new["AGB_du_bao"] = model.predict(X_new)
+# # Predict
+# X_new = df_new[required_new_cols]
+# df_new["AGB_du_bao"] = model.predict(X_new)
 
-st.subheader("Kết quả dự báo (new_data)")
-st.dataframe(df_new)
+# st.subheader("Kết quả dự báo (new_data)")
+# st.dataframe(df_new)
 
-# allow download
-to_write = io.BytesIO()
-df_new.to_excel(to_write, index=False, sheet_name="predictions")
-to_write.seek(0)
-st.download_button("📥 Tải kết quả Excel", to_write, file_name="forest_prediction.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# # allow download
+# to_write = io.BytesIO()
+# df_new.to_excel(to_write, index=False, sheet_name="predictions")
+# to_write.seek(0)
+# st.download_button("📥 Tải kết quả Excel", to_write, file_name="forest_prediction.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
+# Predict (chỉ khi có dữ liệu)
+X_new = df_new[required_new_cols].copy()
+X_new = X_new.apply(pd.to_numeric, errors="coerce")
+
+if X_new.shape[0] == 0:
+    st.warning("⚠️ Sheet 'new_data' không có dữ liệu để dự báo. Hãy nhập ít nhất 1 dòng.")
+else:
+    if X_new.isnull().any().any():
+        st.warning("Có giá trị NaN trong new_data, sẽ thay bằng 0.")
+        X_new = X_new.fillna(0)
+
+    df_new["AGB_du_bao"] = model.predict(X_new)
+
+    st.subheader("Kết quả dự báo (new_data)")
+    st.dataframe(df_new)
+
+    # allow download
+    to_write = io.BytesIO()
+    df_new.to_excel(to_write, index=False, sheet_name="predictions")
+    to_write.seek(0)
+    st.download_button(
+        "📥 Tải kết quả Excel",
+        to_write,
+        file_name="forest_prediction.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
