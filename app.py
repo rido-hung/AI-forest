@@ -170,7 +170,7 @@ X_new = df_new[required_new_cols].copy()
 X_new = X_new.apply(pd.to_numeric, errors="coerce")
 
 if X_new.shape[0] == 0:
-    st.warning("⚠️ Không có dữ liệu để dựbáo.")
+    st.warning("⚠️ Không có dữ liệu để dự báo.")
 else:
     if X_new.isnull().any().any():
         st.warning("Có giá trị NaN trong dữ liệu dự báo, sẽ thay bằng 0.")
@@ -191,4 +191,5 @@ else:
         file_name="forest_prediction.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
