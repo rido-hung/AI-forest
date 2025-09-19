@@ -1,50 +1,31 @@
-# app.py
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from io import BytesIO
-from docx import Document
 
-st.set_page_config(page_title="📊 Forest Data Report", layout="wide")
+st.set_page_config(page_title="🌳 Forest Data Demo", layout="wide")
 
-st.title("🌳 Ứng dụng tạo báo cáo điều tra rừng")
+st.title("🌲 Demo ứng dụng phân tích dữ liệu rừng")
 
-uploaded_file = st.file_uploader("📥 Upload file Excel dữ liệu điều tra rừng", type=["xlsx"])
+uploaded_file = st.file_uploader("📥 Upload file Excel dữ liệu rừng", type=["xlsx"])
 
 if uploaded_file:
+    # Đọc dữ liệu
     df = pd.read_excel(uploaded_file)
-    st.success("✅ Đã tải dữ liệu thành công!")
-    
+    st.success("✅ Đã đọc dữ liệu thành công!")
+
+    # Hiển thị bảng dữ liệu
     st.subheader("📋 Dữ liệu gốc")
     st.dataframe(df.head())
-    
-    # Tính một số thống kê cơ bản
-    st.subheader("📊 Thống kê cơ bản")
-    stats = df.describe()
-    st.dataframe(stats)
 
-    # Vẽ biểu đồ (ví dụ: phân bố đường kính D1.3)
+    # Thống kê cơ bản
+    st.subheader("📊 Thống kê cơ bản")
+    st.write(df.describe())
+
+    # Vẽ biểu đồ tự động nếu có cột DBH (đường kính)
     if "DBH" in df.columns:
-        st.subheader("📈 Biểu đồ phân bố đường kính (DBH)")
-        fig, ax = plt.subplots()
-        df["DBH"].hist(ax=ax, bins=15)
-        ax.set_xlabel("Đường kính D1.3 (cm)")
-        ax.set_ylabel("Số cây")
-        st.pyplot(fig)
-    
-    # Xuất báo cáo Word
-    st.subheader("📝 Xuất báo cáo")
-    if st.button("Tạo file Word"):
-        doc = Document()
-        doc.add_heading("BÁO CÁO ĐIỀU TRA RỪNG", level=1)
-        doc.add_paragraph("Kết quả thống kê cơ bản:")
-        doc.add_paragraph(stats.to_string())
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
-        st.download_button(
-            label="📥 Tải về báo cáo Word",
-            data=buffer,
-            file_name="Forest_Report.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        st.subheader("📈 Phân bố đường kính (DBH)")
+        st.bar_chart(df["DBH"].value_counts().sort_index())
+
+    # Vẽ biểu đồ tự động nếu có cột Height (chiều cao)
+    if "Height" in df.columns:
+        st.subheader("🌲 Phân bố chiều cao")
+        st.line_chart(df["Height"])
