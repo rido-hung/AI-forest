@@ -48,4 +48,13 @@ if file:
     st.subheader("🌱 Phân bố loài")
     species_count = df["Species"].value_counts()
     st.dataframe(species_count)
-    st.bar_chart(species_count)
+    import altair as alt
+
+st.write("📊 Biểu đồ phân bố đường kính (DBH)")
+chart = alt.Chart(dbh_dist.reset_index()).mark_bar().encode(
+    x="index:O",  # cột nhóm đường kính
+    y="dbh:Q"     # cột tần suất
+)
+st.altair_chart(chart, use_container_width=True)
+
+
