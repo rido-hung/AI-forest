@@ -37,12 +37,21 @@ if file:
     - **Chiều cao TB**: {mean_h:.2f} cm  
     """)
 
-    # ===== Phân bố DBH =====
-    st.subheader("📈 Phân bố đường kính (DBH)")
-    dbh_bins = range(0, int(df["DBH"].max()) + 5, 5)
-    dbh_dist = pd.cut(df["DBH"], bins=dbh_bins).value_counts().sort_index()
-    st.dataframe(dbh_dist)
-    st.bar_chart(dbh_dist)
+  # ===== Phân bố DBH =====
+st.subheader("📊 Phân bố đường kính (DBH)")
+
+# Tạo khoảng DBH (bin) mỗi 5 cm
+dbh_bins = range(0, int(df["DBH"].max()) + 5, 5)
+dbh_dist = pd.cut(df["DBH"], bins=dbh_bins).value_counts().sort_index()
+
+# Đổi tên bin thành chuỗi "left-right"
+dbh_dist.index = [f"{int(interval.left)}-{int(interval.right)}" for interval in dbh_dist.index]
+
+# Hiển thị bảng
+st.dataframe(dbh_dist.rename("Số cây"))
+
+# Vẽ biểu đồ cột
+st.bar_chart(dbh_dist)
 
     # ===== Phân bố loài =====
     st.subheader("🌱 Phân bố loài")
@@ -56,5 +65,6 @@ chart = alt.Chart(dbh_dist.reset_index()).mark_bar().encode(
     y="dbh:Q"     # cột tần suất
 )
 st.altair_chart(chart, use_container_width=True)
+
 
 
